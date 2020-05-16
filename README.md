@@ -80,7 +80,7 @@ diy云编译教程: [Read the details in my blog (in Chinese) | 中文教程](ht
 
 ### 默认后台地址 10.0.0.1, 密码 root
 
-### 请分配不低于700M的磁盘容量.
+### 请分配不低于1G 的磁盘容量.
 
 ### 如何在本地使用此项目编译自己需要的 OpenWrt 固件
 
@@ -117,8 +117,10 @@ cd openwrt
 rm -Rf feeds package
 svn co https://github.com/openwrt/openwrt/trunk/package
 git pull
-./scripts/feeds update -a
+[ -f ".config" ] && mv .config .config.bak
+./scripts/feeds update custom -a
 sh ./diy.sh
+[ -f ".config.bak" ] && mv .config.bak .config || mv X86_64.config .config
 make defconfig
    ```
 5. 如需修改默认配置比如定制插件等,请执行 `make menuconfig`
