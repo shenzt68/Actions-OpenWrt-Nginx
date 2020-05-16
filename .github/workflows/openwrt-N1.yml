@@ -36,7 +36,7 @@ jobs:
   
     - name: Load N1-Settings.ini
       run: |
-        source "${GITHUB_WORKSPACE}/N1-setting.ini"
+        source "${GITHUB_WORKSPACE}/N1-settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
         echo "::set-env name=CONFIG_FILE::${CONFIG_FILE}"
@@ -47,7 +47,6 @@ jobs:
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_ARTIFACT::${UPLOAD_FIRMWARE_FOR_ARTIFACT}"
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_RELEASE::${UPLOAD_FIRMWARE_FOR_RELEASE}"
         echo "::set-env name=UPLOAD_FIRMWARE_TO_COWTRANSFER::${UPLOAD_FIRMWARE_TO_COWTRANSFER}"
-
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -67,7 +66,6 @@ jobs:
         echo "::set-env name=date::$(date +'%m/%d_%Y_%H/%M')"
         echo "::set-env name=date2::$(date +'%m/%d %Y')"
         echo "::set-env name=date3::$(date +'%m.%d')"
-
     - name: Clone source code
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -83,9 +81,8 @@ jobs:
         ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/host
         ln -s /mnt/openwrt/dl openwrt/dl
         ln -s /mnt/openwrt/staging_dir openwrt/staging_dir
-
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
+      run: cd openwrt && ./scripts/feeds update custom -a
 
     - name: Load custom configuration
       run: |
@@ -119,7 +116,6 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
     - name: Compile the firmware
       run: |
         cd openwrt
@@ -189,12 +185,13 @@ jobs:
         cowurl=$(./transfer cow --block 2621440 -s --no-progress ${FIRMWARE})
         cowurl=$(echo $cowurl | grep -o -E "https[^ ]*")
         echo "::set-env name=COWURL::$cowurl"
-        echo "Download Link: ${{ env.EMOJI }} $cowurl ${{ env.EMOJI }}"
+        echo "Download Link: ${{ env.EMOJI }} $cowurl ${{ env.EMOJI }} 🚀"
  
     - name: Create release
       id: create_release
       uses: actions/create-release@master
-      if: env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
+      continue-on-error: true
+      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       with:
@@ -208,6 +205,7 @@ jobs:
 
     - name: Upload firmware for release
       uses: csexton/release-asset-action@master
+      continue-on-error: true
       if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
       with:
         pattern: "${{ env.FIRMWARE }}/*"
@@ -219,14 +217,13 @@ jobs:
       continue-on-error: true
       if: env.UPLOAD_FIRMWARE_FOR_ARTIFACT == 'true'
       with:
-        name: ${{ env.date3 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }}
+        name: ${{ env.date3 }} ${{ env.DEVICE_NAME }}
         path: ${{ env.FIRMWARE }}
         
     - name: WeChat notification
       if: env.SCKEY && !cancelled()
       run: |
         [ ${{ env.status }} == 'success' ] && curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译完成😋 || curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译失败😂
-
     - name: Telegram notification
       if: env.TELEGRAM_TOKEN && !cancelled()
       run: |
