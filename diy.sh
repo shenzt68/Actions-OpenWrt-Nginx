@@ -27,7 +27,7 @@ svn co https://github.com/Lienol/openwrt-package/trunk/package/tcping
 git clone https://github.com/pexcn/openwrt-chinadns-ng.git chinadns-ng
 svn co https://github.com/Lienol/openwrt-package/trunk/package/brook
 svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
-svn co https://github.com/solidus1983/luci-theme-opentomato/branches/v19.07/luci/themes/luci-theme-opentomato
+svn co https://github.com/solidus1983/luci-theme-opentomato/trunk/luci/themes/luci-theme-opentomato
 
 git clone https://github.com/garypang13/openwrt-adguardhome
 git clone https://github.com/garypang13/luci-app-php-kodexplorer
@@ -35,11 +35,12 @@ git clone https://github.com/garypang13/luci-app-eqos
 cd -
 
 echo -e "\q" | svn co https://github.com/coolsnowwolf/lede/trunk/package/lean feeds/custom/luci
-cp -Rf ./diy/* ./
 ./scripts/feeds update -a && ./scripts/feeds install -a
+cp -Rf ./diy/* ./
 sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' package/feeds/custom/*/Makefile
 
 rm -Rf package/*/*/qBittorrent/patches
+rm -Rf feeds/packages/lang/php7 && svn co https://github.com/openwrt/packages/branches/openwrt-19.07/lang/php7 feeds/packages/lang/php7
 rm -Rf files/usr/share/amule/webserver/AmuleWebUI-Reloaded && git clone https://github.com/MatteoRagni/AmuleWebUI-Reloaded files/usr/share/amule/webserver/AmuleWebUI-Reloaded
 rm -Rf files/usr/share/aria2 && git clone https://github.com/P3TERX/aria2.conf files/usr/share/aria2
 rm -Rf package/*/*/antileech/src/* && git clone https://github.com/persmule/amule-dlp.antiLeech package/feeds/custom/antileech/src
