@@ -7,7 +7,7 @@
 + 性能,友好度,易用性,插件,以及针对国内特殊环境等的自定义优化
 
 + uhttpd替换为nginx,大大增加可玩性:
-     + nginx搭配PHP与可道云,建站,NAS两不误,基本可替换群晖等专业NAS系统
+     + Nginx+PHP+MariaDB, 用于搭建FileRun,可道云等云盘,建站等.
      + 通过nginx实现Webdav 自建共享同步网盘神器
      + nginx反向代理 实现后台每个页面与服务都可通过自定义域名访问
 
@@ -49,6 +49,7 @@ diy云编译教程: [Read the details in my blog (in Chinese) | 中文教程](ht
 
 + SSR Plus
 + AdguardHome DNS+恶意网址过滤
++ FileRun  google drive风格多功能网盘
 + 上网时间控制
 + 微信推送
 + ACME自动SSL证书生成
@@ -78,9 +79,9 @@ diy云编译教程: [Read the details in my blog (in Chinese) | 中文教程](ht
 
 其他插件请在[Releases](https://github.com/garypang13/Actions-OpenWrt-Nginx/releases/latest)中下载对应的ipk文件,自行安装.
 
-### 默认后台地址 10.0.0.1, 密码 root
+#### 默认后台地址 10.0.0.1, 密码 root
 
-### 请分配不低于1G 的磁盘容量.
+#### 请分配不低于1G 的内存和磁盘空间.
 
 ### 如何在本地使用此项目编译自己需要的 OpenWrt 固件
 
