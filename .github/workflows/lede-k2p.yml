@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: Build lede N1
+name: Build lede K2P
 
 on: 
   # push: 
