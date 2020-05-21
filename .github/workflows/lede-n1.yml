@@ -200,7 +200,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       with:
         tag_name: ${{ env.date }}_${{ env.DEVICE_NAME }}
-        release_name: ${{ env.date2 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }}
+        release_name: ${{ env.date2 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }} 斐讯N1固件
         body: |
             国内加速下载🔥:
             ${{ env.COWURL }} 🚀
