@@ -38,7 +38,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
   
-    - name: Load N1-Settings.ini
+    - name: Load lede-Settings.ini
       run: |
         source "${GITHUB_WORKSPACE}/lede-settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
