@@ -78,9 +78,10 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo mkdir -p -m 777 /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host openwrt/build_dir /mnt/openwrt/dl /mnt/openwrt/staging_dir
+        sudo mkdir -p -m 777 openwrt/build_dir /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/target-x86_64_musl /mnt/openwrt/dl /mnt/openwrt/staging_dir
         ln -s /mnt/openwrt/build_dir/hostpkg openwrt/build_dir/hostpkg
         ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/host
+        # [ -d "openwrt/build_dir/target-x86_64_musl" ] && ln -s /mnt/openwrt/build_dir/target-x86_64_musl openwrt/build_dir/target-x86_64_musl
         ln -s /mnt/openwrt/dl openwrt/dl
         ln -s /mnt/openwrt/staging_dir openwrt/staging_dir
 
@@ -109,7 +110,7 @@ jobs:
         sed -i '$i uci commit network' openwrt/package/*/*/default-settings/files/zzz-default-settings
               
     - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
+      uses: garypang13/debugger-action@master
       if: env.SSH_ACTIONS == 'true'
 
     - name: Download package
@@ -204,6 +205,7 @@ jobs:
         body: |
             墙内加速下载🔥:
             ${{ env.COWURL }} 🚀
+            请分配不低于1G 的内存和存储空间💾.
         draft: false
         prerelease: false     
 
