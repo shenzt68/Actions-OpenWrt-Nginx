@@ -76,9 +76,10 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo mkdir -p -m 777 /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host openwrt/build_dir /mnt/openwrt/dl /mnt/openwrt/staging_dir
+        sudo mkdir -p -m 777 openwrt/build_dir /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/target-x86_64_musl /mnt/openwrt/dl /mnt/openwrt/staging_dir
         ln -s /mnt/openwrt/build_dir/hostpkg openwrt/build_dir/hostpkg
         ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/host
+        # [ -d "openwrt/build_dir/target-x86_64_musl" ] && ln -s /mnt/openwrt/build_dir/target-x86_64_musl openwrt/build_dir/target-x86_64_musl
         ln -s /mnt/openwrt/dl openwrt/dl
         ln -s /mnt/openwrt/staging_dir openwrt/staging_dir
     - name: Update feeds
@@ -106,7 +107,7 @@ jobs:
         sed -i '$i uci commit network' openwrt/package/*/*/default-settings/files/zzz-default-settings
               
     - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
+      uses: garypang13/debugger-action@master
       if: env.SSH_ACTIONS == 'true'
 
     - name: Download package
@@ -154,7 +155,7 @@ jobs:
         | xargs -i mv -f {} ./firmware/
         cp openwrt/.config  ./firmware/config.txt
         cd firmware
-        rename -v "s/^openwrt/${{ env.date3 }}-openwrt/" *rootfs*
+        rename -v "s/^openwrt/${{ env.date3 }}-openwrt/" *combined*
         zip -r luci-app-adbyby-plus.zip *adbyby* || true
         zip -r luci-app-php-kodexplorer *kodexplorer* || true
         zip -r luci-app-passwall.zip *passwall* *chinadns* *haproxy* || true
@@ -196,10 +197,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       with:
         tag_name: ${{ env.date }}_${{ env.DEVICE_NAME }}
-        release_name: ${{ env.date2 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }}
+        release_name: ${{ env.date2 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }} 斐讯N1-opwnwrt固件
         body: |
-            国内加速下载🔥:
+            墙内加速下载🔥:
             ${{ env.COWURL }} 🚀
+            请分配不低于1G 的内存和存储空间💾.
         draft: false
         prerelease: false     
 
@@ -228,3 +230,4 @@ jobs:
       if: env.TELEGRAM_TOKEN && !cancelled()
       run: |
         [ ${{ env.status }} == 'success' ] && curl -k --data chat_id="${{ secrets.TELEGRAM_TO }}" --data "text=🎉 OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译成功 😋" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" || curl -k --data chat_id="${{ secrets.TELEGRAM_TO }}" --data "text=❌ OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译失败 😂" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
+      
