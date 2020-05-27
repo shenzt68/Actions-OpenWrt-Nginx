@@ -8,8 +8,6 @@ git clone https://github.com/jerrykuku/luci-theme-argon
 svn co https://github.com/openwrt/luci/trunk/applications/luci-app-acme
 git clone https://github.com/pymumu/luci-app-smartdns -b lede
 git clone https://github.com/lisaac/luci-app-diskman
-git clone https://github.com/garypang13/openwrt-filerun
-git clone https://github.com/garypang13/luci-app-baidupcs-web
 mkdir parted && cp luci-app-diskman/Parted.Makefile parted/Makefile
 git clone https://github.com/tty228/luci-app-serverchan
 git clone https://github.com/brvphoenix/luci-app-wrtbwmon
@@ -21,18 +19,22 @@ svn co https://github.com/coolsnowwolf/packages/trunk/sound/forked-daapd
 svn co https://github.com/openwrt/luci/trunk/applications/luci-app-sqm
 git clone https://github.com/garypang13/r8125
 git clone https://github.com/ElonH/Rclone-OpenWrt && mv -f Rclone-OpenWrt/* ./
+git clone https://github.com/jefferymvp/luci-app-koolproxyR
 
 svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-passwall
 svn co https://github.com/Lienol/openwrt-package/trunk/package/tcping
 git clone https://github.com/pexcn/openwrt-chinadns-ng.git chinadns-ng
 svn co https://github.com/Lienol/openwrt-package/trunk/package/brook
-svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
+svn co https://github.com/vernesong/OpenClash/branches/master/luci-app-openclash
 svn co https://github.com/Lienol/openwrt-package/trunk/package/ipt2socks
 svn co https://github.com/solidus1983/luci-theme-opentomato/trunk/luci/themes/luci-theme-opentomato
 
 git clone https://github.com/garypang13/openwrt-adguardhome
 git clone https://github.com/garypang13/luci-app-php-kodexplorer
 git clone https://github.com/garypang13/luci-app-eqos
+git clone https://github.com/garypang13/openwrt-qbittorrent
+git clone https://github.com/garypang13/openwrt-filerun
+git clone https://github.com/garypang13/luci-app-baidupcs-web
 cd -
 
 echo -e "\q" | svn co https://github.com/coolsnowwolf/lede/trunk/package/lean feeds/custom/luci
@@ -51,6 +53,7 @@ svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/default-settings/
 # wget https://raw.githubusercontent.com/openwrt/luci/openwrt-19.07/luci.mk -O feeds/luci/luci.mk
 sed -i 's/ @!BUSYBOX_DEFAULT_IP:/ +/g' package/*/*/wrtbwmon/Makefile
 sed -i 's/extra_setting\"/extra_settings\"/g' package/*/*/luci-app-aria2/luasrc/model/cbi/aria2/config.lua
+sed -i 's/services\/aria2/nas\/aria2/g' package/*/*/luci-app-aria2/luasrc/view/aria2/*
 sed -i 's/root\/Download/data\/download\/aria2/g' files/usr/share/aria2/*
 sed -i '/resolvfile=/d' package/*/*/luci-app-adguardhome/root/etc/init.d/AdGuardHome
 sed -i 's/LUCI_DEPENDS:=/LUCI_DEPENDS:=+transmission-daemon-openssl /g' package/*/*/luci-app-transmission/Makefile

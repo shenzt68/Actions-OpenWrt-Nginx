@@ -47,6 +47,7 @@ jobs:
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_ARTIFACT::${UPLOAD_FIRMWARE_FOR_ARTIFACT}"
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_RELEASE::${UPLOAD_FIRMWARE_FOR_RELEASE}"
         echo "::set-env name=UPLOAD_FIRMWARE_TO_COWTRANSFER::${UPLOAD_FIRMWARE_TO_COWTRANSFER}"
+        echo "::set-env name=UPLOAD_FIRMWARE_TO_WETRANSFER::${UPLOAD_FIRMWARE_TO_WETRANSFER}"
 
     - name: Initialization environment
       env:
@@ -78,12 +79,13 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo mkdir -p -m 777 openwrt/build_dir /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/target-x86_64_musl /mnt/openwrt/dl /mnt/openwrt/staging_dir
-        ln -s /mnt/openwrt/build_dir/hostpkg openwrt/build_dir/hostpkg
-        ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/host
-        # [ -d "openwrt/build_dir/target-x86_64_musl" ] && ln -s /mnt/openwrt/build_dir/target-x86_64_musl openwrt/build_dir/target-x86_64_musl
-        ln -s /mnt/openwrt/dl openwrt/dl
-        ln -s /mnt/openwrt/staging_dir openwrt/staging_dir
+        #sudo mkdir -p -m 777 openwrt/build_dir /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host /mnt/openwrt/dl /mnt/openwrt/staging_dir
+        sudo mkdir -p -m 777 /openwrt/build_dir
+        ln -s /openwrt/build_dir openwrt/
+        #ln -s /mnt/openwrt/build_dir/hostpkg openwrt/build_dir/
+        #ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/
+        #ln -s /mnt/openwrt/dl openwrt/
+        #ln -s /mnt/openwrt/staging_dir openwrt/
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update custom -a
@@ -156,6 +158,7 @@ jobs:
         -or -name "*vsftpd*" \
         -or -name "*xlnetacc*" \
         -or -name "*zerotier*" \
+        -or -name "*koolproxyR*" \
         | xargs -i mv -f {} ./firmware/
         cp openwrt/.config  ./firmware/config.txt
         cd firmware
@@ -175,6 +178,7 @@ jobs:
         zip -r luci-app-vsftpd.zip *vsftpd* || true
         zip -r luci-app-xlnetacc.zip *xlnetacc* || true
         zip -r luci-app-zerotier.zip *zerotier* || true
+        zip -r luci-app-koolproxyR.zip *koolproxyR* || true
         rm -Rf *.ipk
         echo "::set-env name=FIRMWARE::$PWD"
         Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
@@ -192,6 +196,16 @@ jobs:
         echo "::set-env name=COWURL::$cowurl"
         echo "Download Link: ${{ env.EMOJI }} $cowurl ${{ env.EMOJI }} 🚀"
  
+    - name: Upload firmware to WeTransfer
+      if: env.UPLOAD_FIRMWARE_TO_WETRANSFER == 'true'
+      continue-on-error: true
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        wetrans=$(./transfer wet -s -p 16 --no-progress ${FIRMWARE})
+        wetrans=$(echo $wetrans | grep -o -E "https[^ ]*")
+        echo "::set-env name=WETRANS::$wetrans"
+        echo "Download Link: ${{ env.EMOJI }} $wetrans ${{ env.EMOJI }} 🚀"
+
     - name: Create release
       id: create_release
       uses: actions/create-release@master
@@ -204,8 +218,12 @@ jobs:
         release_name: ${{ env.date2 }} ${{ env.DEVICE_NAME }} ${{ env.EMOJI }}
         body: |
             墙内加速下载🔥:
-            ${{ env.COWURL }} 🚀
-            请分配不低于1G 的内存和存储空间💾.
+            
+            奶牛快传: ${{ env.COWURL }} 🚀
+            
+            WeTransfer: ${{ env.WETRANS }} 🗽
+            
+            请分配不低于1G 的内存和存储空间 💾
         draft: false
         prerelease: false     
 
