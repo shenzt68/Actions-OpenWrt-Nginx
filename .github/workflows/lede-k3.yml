@@ -51,6 +51,7 @@ jobs:
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_ARTIFACT::${UPLOAD_FIRMWARE_FOR_ARTIFACT}"
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_RELEASE::${UPLOAD_FIRMWARE_FOR_RELEASE}"
         echo "::set-env name=UPLOAD_FIRMWARE_TO_COWTRANSFER::${UPLOAD_FIRMWARE_TO_COWTRANSFER}"
+        echo "::set-env name=UPLOAD_FIRMWARE_TO_WETRANSFER::${UPLOAD_FIRMWARE_TO_WETRANSFER}"
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -117,6 +118,8 @@ jobs:
       run: |
         cd openwrt
         make defconfig
+        [ $(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/') == generic ] && DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/') || DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+        echo "::set-env name=DEVICE_NAME::$DEVICE_NAME"
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -190,7 +193,16 @@ jobs:
         cowurl=$(echo $cowurl | grep -o -E "https[^ ]*")
         echo "::set-env name=COWURL::$cowurl"
         echo "Download Link: ${{ env.EMOJI }} $cowurl ${{ env.EMOJI }} 🚀"
- 
+    - name: Upload firmware to WeTransfer
+      if: env.UPLOAD_FIRMWARE_TO_WETRANSFER == 'true'
+      continue-on-error: true
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        wetrans=$(./transfer wet -s -p 16 --no-progress ${FIRMWARE})
+        wetrans=$(echo $wetrans | grep -o -E "https[^ ]*")
+        echo "::set-env name=WETRANS::$wetrans"
+        echo "Download Link: ${{ env.EMOJI }} $wetrans ${{ env.EMOJI }} 🚀"
+        
     - name: Create release
       id: create_release
       uses: actions/create-release@master
@@ -204,6 +216,7 @@ jobs:
         body: |
             国内加速下载🔥:
             ${{ env.COWURL }} 🚀
+            WeTransfer: ${{ env.WETRANS }} 🗽
         draft: false
         prerelease: false     
 
