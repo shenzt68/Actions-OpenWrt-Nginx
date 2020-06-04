@@ -157,7 +157,7 @@ jobs:
         | xargs -i mv -f {} ./firmware/
         cp openwrt/.config  ./firmware/config.txt
         cd firmware
-        rename -v "s/^openwrt/${{ env.date3 }}-openwrt/" *combined*
+        rename -v "s/^openwrt/${{ env.date3 }}-openwrt/" *rootfs*
         zip -r luci-app-adbyby-plus.zip *adbyby* || true
         zip -r luci-app-php-kodexplorer *kodexplorer* || true
         zip -r luci-app-passwall.zip *passwall* *chinadns* *haproxy* || true
