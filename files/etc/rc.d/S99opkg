@@ -1,0 +1,26 @@
+#!/bin/sh
+if [ ! -f /etc/inited ]; then
+uci del dhcp.@dnsmasq[0].noresolv
+uci commit dhcp
+count=0
+while :
+do
+	httping -c 1 www.baidu.com 1>/dev/null 2>&1
+	if [ "$?" == "0" ]; then
+opkg update
+cp -r /etc/config /etc/confbak
+	for ipk in $(cat /etc/installed-opkg); do
+			opkg upgrade --force-depends --force-checksum $ipk
+	done
+rsync -av /etc/config.bak/* /etc/config --exclude='ucitrack'  --exclude='dhcp'  --exclude='firewall'  --exclude='network'  --exclude='system'
+source /etc/profile.d/opkginstall.sh; opkg install >/dev/null 2>&1
+	touch /etc/inited
+	break
+	fi
+	sleep 5
+	count=$((count+1))
+	if [ $count -gt 120 ]; then
+		break
+	fi
+done
+fi
