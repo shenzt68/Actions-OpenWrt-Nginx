@@ -25,6 +25,7 @@ svn co https://github.com/Lienol/openwrt-package/trunk/package/tcping
 git clone https://github.com/pexcn/openwrt-chinadns-ng.git chinadns-ng
 svn co https://github.com/Lienol/openwrt-package/trunk/package/brook
 svn co https://github.com/vernesong/OpenClash/branches/master/luci-app-openclash
+git clone https://github.com/frainzy1477/luci-app-clash
 svn co https://github.com/Lienol/openwrt-package/trunk/package/ipt2socks
 svn co https://github.com/solidus1983/luci-theme-opentomato/trunk/luci/themes/luci-theme-opentomato
 svn co https://github.com/Lienol/openwrt-package/trunk/others/luci-app-syncthing
@@ -79,7 +80,7 @@ sed -i '$a /etc/amule' package/base-files/files/lib/upgrade/keep.d/base-files-es
 sed -i '$a /www/speedtest/results/telemetry_settings.php' package/base-files/files/lib/upgrade/keep.d/base-files-essential
 sed -i '$a /etc/installed-opkg' package/base-files/files/lib/upgrade/keep.d/base-files-essential
 sed -i '$a /etc/php7/custom.ini' package/base-files/files/lib/upgrade/keep.d/base-files-essential
-find target/linux/x86 -name "config*" -exec bash -c 'cat kernel.conf >> "{}"' \;
+# find target/linux/x86 -name "config*" -exec bash -c 'cat kernel.conf >> "{}"' \;
 sed -i '/continue$/d' package/*/*/luci-app-ssr-plus/root/usr/bin/ssr-switch
 sed -i 's/if test_proxy/sleep 3600\nif test_proxy/g' package/*/*/luci-app-ssr-plus/root/usr/bin/ssr-switch
 sed -i 's/ uci.cursor/ luci.model.uci.cursor/g' package/*/*/luci-app-ssr-plus/root/usr/share/shadowsocksr/subscribe.lua
