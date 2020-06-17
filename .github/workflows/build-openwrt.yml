@@ -51,14 +51,12 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo swapoff /swapfile
-        sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler ccache xsltproc rename antlr3 gperf
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
     
     - name: Get current date
       id: date
@@ -138,43 +136,10 @@ jobs:
         mkdir firmware && find openwrt/bin/*/*/*/ -maxdepth 1 \
         -name "*combined*" \
         -or -name "sha256sums" \
-        -or -name "*adbyby*" \
-        -or -name "*passwall*" \
-        -or -name "*kodexplorer*" \
-        -or -name "*chinadns*" \
-        -or -name "*cifs-mount*" \
-        -or -name "*music-remote-center*" -or -name "*forked-daapd*" \
-        -or -name "*airplay2*" \
-        -or -name "*openclash*" \
-        -or -name "*softethervpn*" \
-        -or -name "*syncdial*" \
-        -or -name "*usb-printer*" \
-        -or -name "*verysync*" \
-        -or -name "*vsftpd*" \
-        -or -name "*xlnetacc*" \
-        -or -name "*zerotier*" \
-        -or -name "*koolproxyR*" \
         | xargs -i mv -f {} ./firmware/
         cp openwrt/.config  ./firmware/config.txt
         cd firmware
         rename -v "s/^openwrt/${{ env.date3 }}-openwrt/" *combined*
-        zip -r luci-app-adbyby-plus.zip *adbyby* || true
-        zip -r luci-app-php-kodexplorer *kodexplorer* || true
-        zip -r luci-app-passwall.zip *passwall* *chinadns* *haproxy* || true
-        zip -r luci-app-baidupcs-web.zip *baidupcs* || true
-        zip -r luci-app-cifs-mount.zip *cifs-mount* || true
-        zip -r luci-app-music-remote-center.zip *music-remote-center* *forked-daapd* || true
-        zip -r luci-app-airplay2.zip *airplay2* || true
-        zip -r luci-app-openclash.zip *openclash* || true
-        zip -r luci-app-softethervpn.zip *softethervpn* || true
-        zip -r luci-app-syncdial.zip *syncdial* || true
-        zip -r luci-app-usb-printer.zip *usb-printer* || true
-        zip -r luci-app-verysync.zip *verysync* || true
-        zip -r luci-app-vsftpd.zip *vsftpd* || true
-        zip -r luci-app-xlnetacc.zip *xlnetacc* || true
-        zip -r luci-app-zerotier.zip *zerotier* || true
-        zip -r luci-app-koolproxyR.zip *koolproxyR* || true
-        rm -Rf *.ipk
         echo "::set-env name=FIRMWARE::$PWD"
         Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
         RANDOM=$$$(date +%s)
@@ -217,7 +182,7 @@ jobs:
             
             WeTransfer: ${{ env.WETRANS }} 🗽
             
-            请分配不低于1G 的内存和存储空间 💾
+            请分配不低于800M 的存储空间 💾
         draft: false
         prerelease: false     
 
@@ -241,8 +206,14 @@ jobs:
     - name: WeChat notification
       if: env.SCKEY
       run: |
+<<<<<<< HEAD
         [ ${{ env.status }} == 'success' ] && curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译完成😋 || curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译失败😂
+=======
+        [ ${{ env.status }} == 'success' ] && curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译完成😋 ${{ env.COWURL }}|| curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译失败😂
+
+>>>>>>> 248a66151c1faa1e1d4098c1e0c6342f348766cd
     - name: Telegram notification
       if: env.TELEGRAM_BOT_URL
+      continue-on-error: true
       run: |
-        [ ${{ env.status }} == 'success' ] && curl -d "text=🎉 OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译成功 😋" -X POST ${{ secrets.TELEGRAM_BOT_URL }} || curl -d "text=❌ OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译失败 😂" -X POST ${{ secrets.TELEGRAM_BOT_URL }}
+        [ ${{ env.status }} == 'success' ] && curl -d "text=🎉 OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译成功 😋 ${{ env.COWURL }} 🚀" -X POST ${{ secrets.TELEGRAM_BOT_URL }} || curl -d "text=❌ OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译失败 😂" -X POST ${{ secrets.TELEGRAM_BOT_URL }}
