@@ -1,4 +1,7 @@
 #!/bin/sh
+
+exec > /var/persist-packages.log 2>&1
+
 if [ ! -f /etc/inited ]; then
 [ uci get dhcp.@dnsmasq[0].noresolv ] && {
 uci del dhcp.@dnsmasq[0].noresolv
@@ -12,10 +15,18 @@ do
 	if [ "$?" == "0" ]; then
 opkg update
 cp -r /etc/config /etc/confbak
+	for ipk in $(cat /etc/backup/installed_packages.txt | grep -oE '.*overlay' | awk '{print $1}'); do
+			opkg upgrade --force-depends --force-checksum $ipk
+	done
+
+	[ -f "/etc/installed-opkg" ] && {
 	for ipk in $(cat /etc/installed-opkg); do
 			opkg upgrade --force-depends --force-checksum $ipk
 	done
-rsync -av /etc/config.bak/* /etc/config --exclude='ucitrack'  --exclude='dhcp'  --exclude='firewall'  --exclude='network'  --exclude='system'
+	}
+
+rsync -av /etc/confbak/* /etc/config --exclude='ucitrack'  --exclude='dhcp'  --exclude='firewall'  --exclude='network'  --exclude='system'
+rm /etc/config/.*-opkg
 source /etc/profile.d/opkginstall.sh; opkg install >/dev/null 2>&1
 	touch /etc/inited
 	break
