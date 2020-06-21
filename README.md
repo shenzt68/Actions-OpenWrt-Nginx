@@ -2,7 +2,7 @@
 <a href="https://t.me/openwrt_nginx" target="_blank">Telegram</a>
 ### 特色:
 
-+ 全网最新,openwrt官方master分支版本,内核升级到5.4. 与官方最新源码同步.
++ Cutting edge,openwrt官方master分支版本,内核升级到5.4. 与官方最新源码同步.
 
 + 原生极致纯净,固件默认只包含基础上网功能,后台在线选装插件,自建插件仓库囊括了市面上主流开源插件,系统升级不丢失插件和配置.
 
@@ -110,9 +110,8 @@ Build OpenWrt using GitHub Actions
 ### Usage
 
 - Sign up for [GitHub Actions](https://github.com/features/actions/signup)
-- Fork [this GitHub repository](https://github.com/P3TERX/Actions-OpenWrt)
-- Generate `.config` files using [OpenWrt](https://github.com/openwrt/openwrt/tree/openwrt-19.07) source code.
-- Push `.config` file to the GitHub repository, and the build starts automatically.Progress can be viewed on the Actions page.
+- Fork [this GitHub repository](https://github.com/garypang13/Actions-OpenWrt-Nginx)
+- click the `Star` button, and the build will starts automatically.Progress can be viewed on the Actions page.
 - When the build is complete, click the `Artifacts` button in the upper right corner of the Actions page to download the binaries.
 
 ### Acknowledgments

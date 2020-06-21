@@ -19,8 +19,9 @@ svn co https://github.com/openwrt/luci/trunk/applications/luci-app-sqm
 git clone https://github.com/garypang13/r8125
 git clone https://github.com/ElonH/Rclone-OpenWrt && mv -f Rclone-OpenWrt/* ./
 git clone https://github.com/jefferymvp/luci-app-koolproxyR
-git clone https://github.com/KryptonLee/qBittorrent-openwrt-package
 git clone https://github.com/garypang13/luci-app-qbittorrent
+git clone https://github.com/jerrykuku/luci-app-vssr
+git clone https://github.com/jerrykuku/lua-maxminddb
 
 svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-passwall
 svn co https://github.com/Lienol/openwrt-package/trunk/package/tcping
@@ -44,7 +45,6 @@ svn co https://github.com/Lienol/openwrt-package/trunk/lienol/luci-app-kodexplor
 svn co https://github.com/openwrt/openwrt/branches/openwrt-19.07/package/network/services/samba36
 cd -
 
-mv feeds/custom/luci/qBittorrent-openwrt-package/* feeds/custom/luci/
 mv -f feeds/packages/libs/libx264 feeds/custom/luci/libx264
 mv -f feeds/packages/net/aria2 feeds/custom/luci/aria2
 mv -f feeds/packages/admin/netdata feeds/custom/luci/netdata
@@ -54,6 +54,7 @@ echo -e "\q" | svn co https://github.com/coolsnowwolf/lede/trunk/package/lean fe
 ./scripts/feeds update -a && ./scripts/feeds install -a
 cp -Rf ./diy/* ./
 sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' package/feeds/custom/*/Makefile
+sed -i 's/-std=\(gnu\|c\)++\(11\|14\)//g' package/feeds/*/*/Makefile
 
 rm -Rf package/*/*/autocore
 rm -Rf package/*/*/qBittorrent/patches
