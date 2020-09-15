@@ -9,13 +9,7 @@
 name: Openwrt-AutoBuild
 
 on: 
-  # push: 
-  #   branches:
-  #     - master
-  # schedule:
-  #  - cron: 0 16 * * 6
-  watch:
-    types: started
+  repository_dispatch:
 
 env:
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
@@ -35,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [x86_64]
+        target: ["${{ github.event.client_payload.target }}"]
         
     steps:
     - name: Checkout
@@ -55,6 +49,7 @@ jobs:
         echo "::set-env name=UPLOAD_FIRMWARE_FOR_RELEASE::${UPLOAD_FIRMWARE_FOR_RELEASE}"
         echo "::set-env name=UPLOAD_FIRMWARE_TO_COWTRANSFER::${UPLOAD_FIRMWARE_TO_COWTRANSFER}"
         echo "::set-env name=UPLOAD_FIRMWARE_TO_WETRANSFER::${UPLOAD_FIRMWARE_TO_WETRANSFER}"
+
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -72,6 +67,7 @@ jobs:
         echo "::set-env name=date::$(date +'%m/%d_%Y_%H/%M')"
         echo "::set-env name=date2::$(date +'%m/%d %Y')"
         echo "::set-env name=date3::$(date +'%m.%d')"
+
     - name: Clone source code
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -91,21 +87,9 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-<<<<<<< HEAD
-        #sudo mkdir -p -m 777 openwrt/build_dir /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/build_dir/host /mnt/openwrt/dl /mnt/openwrt/staging_dir
-        sudo mkdir -p -m 777 /openwrt/build_dir
-        ln -s /openwrt/build_dir openwrt/
-        #ln -s /mnt/openwrt/build_dir/hostpkg openwrt/build_dir/
-        #ln -s /mnt/openwrt/build_dir/host openwrt/build_dir/
-        #ln -s /mnt/openwrt/dl openwrt/
-        #ln -s /mnt/openwrt/staging_dir openwrt/
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-=======
         sudo mkdir -p -m 777 /mnt/openwrt/dl /mnt/openwrt/staging_dir
         ln -s /mnt/openwrt/dl openwrt/
         ln -s /mnt/openwrt/staging_dir openwrt/
->>>>>>> a107155ccfa8b0bfeb31cf4c9bf43b38e2f8f36a
 
     - name: Load custom configuration
       run: |
@@ -167,7 +151,7 @@ jobs:
               
     - name: SSH connection to Actions
       uses: garypang13/debugger-action@master
-      if: env.SSH_ACTIONS == 'true'
+      if: contains(github.event.action, 'ssh')
 
     - name: Download package
       id: package
@@ -176,6 +160,7 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+
     - name: Compile the firmware
       run: |
         cd openwrt
@@ -228,7 +213,7 @@ jobs:
         echo "Download Link: ${{ env.EMOJI }} $cowurl ${{ env.EMOJI }} 🚀"
  
     - name: Upload firmware to WeTransfer
-      if: env.UPLOAD_FIRMWARE_TO_WETRANSFER == 'true'
+      if: env.UPLOAD_FIRMWARE_TO_WETRANSFER == 'true' && ! contains(github.event.action, 'noup')
       continue-on-error: true
       run: |
         curl -fsSL git.io/file-transfer | sh
@@ -236,11 +221,12 @@ jobs:
         wetrans=$(echo $wetrans | grep -o -E "https[^ ]*")
         echo "::set-env name=WETRANS::$wetrans"
         echo "Download Link: ${{ env.EMOJI }} $wetrans ${{ env.EMOJI }} 🚀"
+
     - name: Create release
       id: create_release
       uses: actions/create-release@main
       continue-on-error: true
-      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
+      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true' && ! contains(github.event.action, 'noup')
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       with:
@@ -261,7 +247,7 @@ jobs:
     - name: Upload firmware for release
       uses: csexton/release-asset-action@master
       continue-on-error: true
-      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
+      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true' && ! contains(github.event.action, 'noup')
       with:
         pattern: "${{ env.FIRMWARE }}/*"
         github-token: ${{ secrets.REPO_TOKEN }}
@@ -278,14 +264,10 @@ jobs:
     - name: WeChat notification
       if: env.SCKEY
       run: |
-<<<<<<< HEAD
-        [ ${{ env.status }} == 'success' ] && curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译完成😋 ${{ env.COWURL }}|| curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译失败😂
-=======
         [ ${{ env.status }} == 'success' ] && curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译完成😋|| curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.date3 }}_${{ env.DEVICE_NAME }}编译失败😂
 
->>>>>>> a107155ccfa8b0bfeb31cf4c9bf43b38e2f8f36a
     - name: Telegram notification
-      if: env.TELEGRAM_TOKEN
+      if: env.TELEGRAM_TOKEN && ! contains(github.event.action, 'notg')
       continue-on-error: true
       run: |
         [ ${{ env.status }} == 'success' ] && curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=🎉 OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译成功 😋  ${{ env.COWURL }}   ${{ env.WETRANS }} 🚀" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" || curl -k --data chat_id="${{ secrets.TELEGRAM_TO }}" --data "text=❌ OpenWrt ${{ env.date3 }} ${{ env.DEVICE_NAME }} 编译失败 😂" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
